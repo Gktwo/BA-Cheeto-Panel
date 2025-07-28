@@ -3,11 +3,11 @@ name: Build and Release
 on:
   # 推送到主分支时触发
   push:
-    branches: [ main, master ]
+    branches: [ master ]
   
   # 创建PR时触发
   pull_request:
-    branches: [ main, master ]
+    branches: [ master ]
   
   # 手动触发
   workflow_dispatch:
@@ -102,9 +102,10 @@ jobs:
         run: cargo install tauri-cli --locked
 
       - name: Build Tauri app
-        run: cargo tauri build --release
+        run: cargo tauri build
         env:
           CARGO_TERM_COLOR: always
+          CARGO_PROFILE_RELEASE_OPT_LEVEL: 3
 
       - name: Create Windows zip package
         run: |
@@ -112,21 +113,21 @@ jobs:
           $version = "0.1.0"
           $zipName = "$appName-windows-v$version.zip"
           
-          # 创建临时目录
+
           New-Item -ItemType Directory -Path "temp" -Force
           
-          # 复制可执行文件到临时目录
+ 
           Copy-Item "src-tauri/target/release/ba-cheeto.exe" "temp/"
           
-          # 复制其他必要文件（如果有的话）
+   
           if (Test-Path "src-tauri/target/release/resources") {
             Copy-Item "src-tauri/target/release/resources" "temp/" -Recurse
           }
           
-          # 创建zip文件
+     
           Compress-Archive -Path "temp/*" -DestinationPath $zipName -Force
           
-          # 清理临时目录
+      
           Remove-Item "temp" -Recurse -Force
 
       - name: Upload Windows artifacts
